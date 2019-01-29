@@ -19,6 +19,12 @@ void clear_ctrlc(void);	/* clear the Control-C condition */
 int disable_ctrlc(int);	/* 1 to disable, 0 to enable Control-C detect */
 int confirm_yesno(void);        /*  1 if input is "y", "Y", "yes" or "YES" */
 
+/*
+ * console_logbuffer_init() - set up the console log buffer
+ *
+ */
+int console_logbuffer_init(void);
+
 /**
  * console_record_init() - set up the console recording buffers
  *

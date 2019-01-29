@@ -709,6 +709,15 @@ static int initf_bootstage(void)
 	return 0;
 }
 
+static int initf_console_logbuffer(void)
+{
+#if defined(CONFIG_CONSOLE_LOGBUFFER)
+	return console_logbuffer_init();
+#else
+	return 0;
+#endif
+}
+
 static int initf_console_record(void)
 {
 #if defined(CONFIG_CONSOLE_RECORD) && CONFIG_VAL(SYS_MALLOC_F_LEN)
@@ -760,6 +769,7 @@ static const init_fnc_t init_sequence_f[] = {
 	initf_malloc,
 	log_init,
 	initf_bootstage,	/* uses its own timer, so does not need DM */
+	initf_console_logbuffer,
 	initf_console_record,
 #if defined(CONFIG_HAVE_FSP)
 	arch_fsp_init,

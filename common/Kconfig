@@ -259,6 +259,25 @@ config CONSOLE_RECORD_IN_SIZE
 	  The buffer is allocated immediately after the malloc() region is
 	  ready.
 
+config CONSOLE_LOGBUFFER
+	bool "Console logbuffer"
+	help
+	  This provides a way to store console output to a provided buffer.
+
+config CONSOLE_LOGBUFFER_ADDR
+	hex "Console logbuffer address"
+	depends on CONSOLE_LOGBUFFER
+	help
+	  Set the start address of the console logbuffer. 
+
+config CONSOLE_LOGBUFFER_SIZE
+	hex "Console logbuffer size"
+	depends on CONSOLE_LOGBUFFER
+	default 0x4000 if CONSOLE_LOGBUFFER
+	help
+	  Set the size of the console logbuffer.
+
+
 config IDENT_STRING
 	string "Board specific string to be added to uboot version string"
 	help

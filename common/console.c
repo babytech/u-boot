@@ -487,6 +487,53 @@ static inline void pre_console_puts(const char *s) {}
 static inline void print_pre_console_buffer(int flushpoint) {}
 #endif
 
+#ifdef CONFIG_CONSOLE_LOGBUFFER
+
+#define LOGBUFF_MAGIC	0xc0de4ced	/* Forced by code, eh! */
+
+typedef struct {
+	uint32_t  tag;
+	uint64_t  start;
+	uint64_t  con;
+	uint64_t  end;
+	uint64_t  chars;
+	uint8_t   buf[0];
+} logbuff_t;
+
+static inline void console_logbuffer_putc(const char c)
+{
+	logbuff_t *logbuff = (logbuff_t *)(gd->logbuffer);
+	char *buff = (char *)(logbuff->buf);
+
+	/* no room to save */
+	if (logbuff->end >= (CONFIG_CONSOLE_LOGBUFFER_SIZE - sizeof(*logbuff)))
+		return;
+
+	buff[logbuff->end] = c;
+	logbuff->end++;
+}
+
+static inline void console_logbuffer_puts(const char *s)
+{
+	while (*s)
+		console_logbuffer_putc(*s++);
+}
+
+int console_logbuffer_init(void)
+{
+	logbuff_t *logbuff;
+
+        gd->logbuffer = (void *)CONFIG_CONSOLE_LOGBUFFER_ADDR;
+
+	logbuff = (logbuff_t *)(gd->logbuffer);
+	logbuff->tag   = LOGBUFF_MAGIC;
+	logbuff->start = 0;
+	logbuff->end   = 0;
+
+        return 0;
+}
+#endif
+
 void putc(const char c)
 {
 #ifdef CONFIG_SANDBOX
@@ -505,6 +552,9 @@ void putc(const char c)
 #endif
 	if (!gd)
 		return;
+#ifdef CONFIG_CONSOLE_LOGBUFFER
+	console_logbuffer_putc(c);
+#endif
 #ifdef CONFIG_CONSOLE_RECORD
 	if ((gd->flags & GD_FLG_RECORD) && gd->console_out.start)
 		membuff_putbyte(&gd->console_out, c);
@@ -546,6 +596,9 @@ void puts(const char *s)
 #endif
 	if (!gd)
 		return;
+#ifdef CONFIG_CONSOLE_LOGBUFFER
+	console_logbuffer_puts(s);
+#endif
 #ifdef CONFIG_CONSOLE_RECORD
 	if ((gd->flags & GD_FLG_RECORD) && gd->console_out.start)
 		membuff_put(&gd->console_out, s, strlen(s));
